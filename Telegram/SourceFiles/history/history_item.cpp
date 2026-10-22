@@ -3430,7 +3430,8 @@ bool HistoryItem::canStopPoll() const {
 }
 
 bool HistoryItem::forbidsForward() const {
-	return (_flags & MessageFlag::NoForwards);
+	// Verification build: ignore per-message content protection.
+	return false;
 }
 
 bool HistoryItem::forbidsSaving() const {

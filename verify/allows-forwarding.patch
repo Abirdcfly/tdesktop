@@ -1,0 +1,42 @@
+diff --git a/Telegram/SourceFiles/data/data_channel.cpp b/Telegram/SourceFiles/data/data_channel.cpp
+index a08cf0546d..8fc0ad5998 100644
+--- a/Telegram/SourceFiles/data/data_channel.cpp
++++ b/Telegram/SourceFiles/data/data_channel.cpp
+@@ -772,7 +772,8 @@ bool ChannelData::canAddAdmins() const {
+ }
+ 
+ bool ChannelData::allowsForwarding() const {
+-	return !(flags() & Flag::NoForwards);
++	// Verification build: ignore channel-wide content protection.
++	return true;
+ }
+ 
+ bool ChannelData::canViewMembers() const {
+diff --git a/Telegram/SourceFiles/data/data_chat.cpp b/Telegram/SourceFiles/data/data_chat.cpp
+index d4688404bf..e1ad5a3f6f 100644
+--- a/Telegram/SourceFiles/data/data_chat.cpp
++++ b/Telegram/SourceFiles/data/data_chat.cpp
+@@ -65,7 +65,8 @@ ChatAdminRightsInfo ChatData::defaultAdminRights(not_null<UserData*> user) {
+ }
+ 
+ bool ChatData::allowsForwarding() const {
+-	return !(flags() & Flag::NoForwards);
++	// Verification build: ignore group-wide content protection.
++	return true;
+ }
+ 
+ bool ChatData::canEditInformation() const {
+diff --git a/Telegram/SourceFiles/history/history_item.cpp b/Telegram/SourceFiles/history/history_item.cpp
+index 662559e7e2..9e81d5c680 100644
+--- a/Telegram/SourceFiles/history/history_item.cpp
++++ b/Telegram/SourceFiles/history/history_item.cpp
+@@ -3430,7 +3430,8 @@ bool HistoryItem::canStopPoll() const {
+ }
+ 
+ bool HistoryItem::forbidsForward() const {
+-	return (_flags & MessageFlag::NoForwards);
++	// Verification build: ignore per-message content protection.
++	return false;
+ }
+ 
+ bool HistoryItem::forbidsSaving() const {

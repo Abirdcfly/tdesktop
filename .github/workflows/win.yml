@@ -264,6 +264,24 @@ jobs:
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' -o -path '*/src/wallet_engine/*' -o '(' '(' -path '*/tlottie/*' -o -path '*/wallet-engine/*' ')' ! -path '*/target/*' ')' ')' -type f ')' -o '(' -empty ! -path '*/tlottie/*' ! -path '*/wallet-engine/*' ')' ')' -delete
 
+      # Compiles the real download-gate functions verbatim and checks the
+      # truth table: the patch must open channel-wide and per-message content
+      # protection, while TTL media stays protected. The step always exits 0
+      # on purpose - it reports, it does not block the build.
+      - name: Content-protection gate verification.
+        if: env.ONLY_CACHE == 'false'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Set-Location "$env:TBUILD\$env:REPO_NAME"
+          git fetch --no-tags --depth=200 origin dev 2>&1 | Out-String | Write-Host
+          python verify\run_verify.py
+          $verify = $LASTEXITCODE
+          python verify\run_gates.py
+          $gates = $LASTEXITCODE
+          Write-Host "=== GATE VERIFICATION: run_verify=$verify run_gates=$gates (0 = PASS) ==="
+          exit 0
+
       - name: Telegram Desktop build.
         if: env.ONLY_CACHE == 'false'
         run: |
@@ -277,7 +295,7 @@ jobs:
           -D CMAKE_CONFIGURATION_TYPES=Debug ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=ON ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
-          -D DESKTOP_APP_DISABLE_AUTOUPDATE=OFF ^
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF ^
           %TDESKTOP_BUILD_DEFINE%
 
@@ -289,7 +307,7 @@ jobs:
           set OUT=%TBUILD%\%REPO_NAME%\out\Debug
           mkdir artifact
           move %OUT%\Telegram.exe artifact/
-          move %OUT%\Updater.exe artifact/
+          if exist %OUT%\Updater.exe move %OUT%\Updater.exe artifact/
       - uses: actions/upload-artifact@v7
         name: Upload artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
