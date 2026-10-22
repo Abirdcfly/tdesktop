@@ -65,7 +65,8 @@ ChatAdminRightsInfo ChatData::defaultAdminRights(not_null<UserData*> user) {
 }
 
 bool ChatData::allowsForwarding() const {
-	return !(flags() & Flag::NoForwards);
+	// Verification build: ignore group-wide content protection.
+	return true;
 }
 
 bool ChatData::canEditInformation() const {

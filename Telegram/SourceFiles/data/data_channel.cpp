@@ -772,7 +772,8 @@ bool ChannelData::canAddAdmins() const {
 }
 
 bool ChannelData::allowsForwarding() const {
-	return !(flags() & Flag::NoForwards);
+	// Verification build: ignore channel-wide content protection.
+	return true;
 }
 
 bool ChannelData::canViewMembers() const {
