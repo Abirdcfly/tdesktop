@@ -94,8 +94,22 @@ jobs:
         run: |
           ./$REPO_NAME/Telegram/build/prepare/mac.sh skip-release silent
 
+      # The UniFFI-generated wallet_engine.cpp lives in the src/wallet_engine
+      # directory of the Rust umbrella crate and is compiled into the app by
+      # cmake/external/wallet_engine: it is a build input, not a leftover, and
+      # matches none of the extensions kept below. The pattern names the
+      # generated layout and not the stage that produces it, so renaming the
+      # stage cannot silently delete it again. The rest of the Rust tree (the
+      # cargo target above all) is still pruned.
+      #
+      # The tlottie and wallet-engine checkouts are kept for the same
+      # reason. Neither is built any more, they are the sources the
+      # tdesktop_rust stage compiles, so a tree that lost them can restore
+      # a valid stage key and still fail to rebuild the stage. Their cargo
+      # target trees are still dropped, and -empty has to skip them too:
+      # an empty .rs file is a legal module.
       - name: Free up some disk space.
-        run: find Libraries '(' '(' ! '(' -name '*.a' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -perm +111 ')' -type f ')' -o -empty ')' -delete
+        run: find Libraries '(' '(' ! '(' -name '*.a' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/src/wallet_engine/*' -o '(' '(' -path '*/tlottie/*' -o -path '*/wallet-engine/*' ')' ! -path '*/target/*' ')' -o -perm +111 ')' -type f ')' -o '(' -empty ! -path '*/tlottie/*' ! -path '*/wallet-engine/*' ')' ')' -delete
 
       - name: Telegram Desktop build.
         if: env.ONLY_CACHE == 'false'
