@@ -1073,11 +1073,30 @@ void DownloadManager::removed(not_null<const HistoryItem*> item) {
 		const auto i = ranges::find(data.downloading, item, ByItem);
 		Assert(i != end(data.downloading));
 
-		// We don't want to download files without messages.
-		// For example, there is no way to refresh a file reference for them.
-		//entry.object.item = nullptr;
-		cancel(data, i);
+		// WHY: a bot may recall the media while it is still downloading,
+		// the transfer must survive the removal of its message.
+		if (i->done
+			|| i->externalCancel
+			|| _generated.contains(i->object.item)) {
+			cancel(data, i);
+		} else {
+			detachLoading(i);
+		}
 	}
+}
+
+void DownloadManager::detachLoading(
+		std::vector<DownloadingId>::iterator i) {
+	const auto was = i->object.item;
+	const auto now = regenerateItem(i->object);
+	i->object.item = now;
+	if (_loading.remove(was)) {
+		_loading.emplace(now);
+	}
+	if (_loadingDone.remove(was)) {
+		_loadingDone.emplace(now);
+	}
+	_loadingListChanges.fire({});
 }
 
 not_null<HistoryItem*> DownloadManager::regenerateItem(

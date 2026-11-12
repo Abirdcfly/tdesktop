@@ -166,6 +166,7 @@ private:
 	void changed(not_null<const HistoryItem*> item);
 	void removed(not_null<const HistoryItem*> item);
 	void detach(SessionData &data, DownloadedId &id);
+	void detachLoading(std::vector<DownloadingId>::iterator i);
 	void untrack(not_null<Main::Session*> session);
 	void remove(
 		SessionData &data,

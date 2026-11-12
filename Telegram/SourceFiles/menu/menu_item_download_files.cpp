@@ -122,6 +122,7 @@ void AddAction(
 		auto dates = std::vector<TimeId>();
 		for (const auto &[photo, fullId] : photos) {
 			if (const auto view = photo->createMediaView()) {
+				photo->setSaveInProgress(true);
 				view->wanted(Data::PhotoSize::Large, fullId);
 				views.push_back(view);
 				const auto photoDate = photo->date();
@@ -163,6 +164,9 @@ void AddAction(
 							QFileDevice::FileAccessTime);
 					}
 				}
+			}
+			for (const auto &[photo, _] : photos) {
+				photo->setSaveInProgress(false);
 			}
 			if (showToast) {
 				showToast(lastPath);

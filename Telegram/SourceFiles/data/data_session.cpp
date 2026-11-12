@@ -2449,7 +2449,7 @@ bool Session::photoHasItemReferences(
 }
 
 void Session::clearPhotoCache(not_null<PhotoData*> photo) {
-	if (!photo->hasVideo()) {
+	if (!photo->hasVideo() && !photo->saveInProgress()) {
 		photo->clearLocalCache();
 	}
 }

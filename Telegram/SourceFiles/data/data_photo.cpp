@@ -220,6 +220,14 @@ void PhotoData::clearLocalCache() {
 	}
 }
 
+void PhotoData::setSaveInProgress(bool value) {
+	_saveInProgress = value;
+}
+
+bool PhotoData::saveInProgress() const {
+	return _saveInProgress;
+}
+
 float64 PhotoData::progress() const {
 	if (uploading()) {
 		if (uploadingData->size > 0) {
@@ -371,12 +379,16 @@ void PhotoData::load(
 				ValidatePhotoImage(std::move(result), _images[valid]),
 				std::move(bytes));
 		}
-		if (validSize == PhotoSize::Large && goodFor == validSize) {
-			_owner->photoLoadDone(this);
+		if (validSize == PhotoSize::Large) {
+			_saveInProgress = false;
+			if (goodFor == validSize) {
+				_owner->photoLoadDone(this);
+			}
 		}
 	};
 	const auto fail = [=](bool started) {
 		if (validSize == PhotoSize::Large) {
+			_saveInProgress = false;
 			_owner->photoLoadFail(this, started);
 		}
 	};

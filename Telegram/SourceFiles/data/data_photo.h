@@ -59,6 +59,8 @@ public:
 	[[nodiscard]] bool displayLoading() const;
 	void cancel();
 	void clearLocalCache();
+	void setSaveInProgress(bool value);
+	[[nodiscard]] bool saveInProgress() const;
 	[[nodiscard]] float64 progress() const;
 	[[nodiscard]] int32 loadOffset() const;
 	[[nodiscard]] bool uploading() const;
@@ -194,6 +196,7 @@ private:
 	uint64 _access = 0;
 	bool _hasStickers = false;
 	bool _extendedMediaPreview = false;
+	bool _saveInProgress = false;
 
 	QByteArray _fileReference;
 	std::unique_ptr<Data::ReplyPreview> _replyPreview;

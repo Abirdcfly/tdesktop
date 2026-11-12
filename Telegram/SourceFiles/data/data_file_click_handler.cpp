@@ -225,6 +225,7 @@ void PhotoSaveClickHandler::onClickImpl() const {
 		return;
 	} else {
 		data->clearFailed(Data::PhotoSize::Large);
+		data->setSaveInProgress(true);
 		data->load(context());
 	}
 }
